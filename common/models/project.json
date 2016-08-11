@@ -37,6 +37,13 @@
       "principalType": "ROLE",
       "principalId": "admin",
       "permission": "ALLOW",
+      "property": "count"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
       "property": "find"
     },
     {

@@ -21,13 +21,13 @@ describe('REST API request', function() {
     require('./start-server');
     done();
   });
-  
+
   after(function(done) {
     app.removeAllListeners('started');
     app.removeAllListeners('loaded');
     done();
   });
-  
+
   it('should not allow access without access token', function(done){
     json('get', '/api/projects')
       .expect(401, done);
@@ -49,9 +49,9 @@ describe('REST API request', function() {
             var projects = res.body;
             assert(typeof res.body === 'object');
             assert(res.body.balance);
-            assert.equal(res.body.balance, 100); 
+            assert.equal(res.body.balance, 100);
+            done();
           });
-        done();
       });
   });
 
@@ -71,9 +71,9 @@ describe('REST API request', function() {
           .expect(200, function(err, res){
             var projects = res.body;
             assert(Array.isArray(res.body));
-            assert.equal(res.body.length, 2);
+            assert.equal(res.body.length, 3);
           });
-        done();
+          done();
       });
   });
 
@@ -83,12 +83,129 @@ describe('REST API request', function() {
             id: 2,
             amount: 10
           })
-          .expect(200, function(err, res){            
+          .expect(200, function(err, res){
             assert(typeof res.body === 'object');
             assert(res.body.success);
-            assert.equal(res.body.success, true);
+            assert.equal(res.body.success, false);
           });
-        done();
+          done();
+  });
+
+  it('should login the admin user and get all project', function(done) {
+    json('post', '/api/users/login')
+      .send({
+        username: 'Bob',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res) {
+        assert(typeof res.body === 'object');
+        assert(res.body.id, 'must have an access token');
+        assert.equal(res.body.userId, 3);
+        accessToken = res.body.id;
+        json('get', '/api/projects/count?access_token=' + accessToken)
+          .expect(200, function(err, res){
+            assert(typeof res.body === 'object');
+            assert(res.body.count);
+						// total number of projects is 3
+            assert.equal(res.body.count, 3);
+            done();
+          });
+      });
+  });
+
+  it('should not allow access to project count without admin role', function(done){
+    json('post', '/api/users/login')
+      .send({
+        username: 'John',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res){
+        assert(typeof res.body === 'object');
+        assert(res.body.id, 'must have an access token');
+        accessToken = res.body.id;
+        json('get', '/api/projects/count?access_token=' + accessToken)
+        .expect(401, done);
+      });
+  });
+
+  it('should show teams for a user', function(done) {
+    json('post', '/api/users/login')
+      .send({
+        username: 'Jane',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res) {
+        assert(typeof res.body === 'object');
+        assert(res.body.id, 'must have an access token');
+        assert.equal(res.body.userId, 2);
+        accessToken = res.body.id;
+        json('get', `/api/users/me/teams?access_token=${accessToken}`)
+          .expect(200, function(err, res){
+            assert(Array.isArray(res.body));
+						// user is member of 4 teams
+            assert.equal(res.body.length, 4);
+            done();
+          });
+      });
+  });
+
+  it('should show projects for a user', function(done) {
+    json('post', '/api/users/login')
+      .send({
+        username: 'Jane',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res) {
+        assert(typeof res.body === 'object');
+        assert(res.body.id, 'must have an access token');
+        assert.equal(res.body.userId, 2);
+        accessToken = res.body.id;
+        json('get', `/api/users/me/projects?access_token=${accessToken}`)
+          .expect(200, function(err, res){
+            assert(Array.isArray(res.body));
+						// user is owner of 2 projects
+            assert.equal(res.body.length, 2);
+            done();
+          });
+      });
+  });
+
+  it('should show project team for a user', function(done) {
+    json('post', '/api/users/login')
+      .send({
+        username: 'Jane',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res) {
+        assert(typeof res.body === 'object');
+        assert(res.body.id, 'must have an access token');
+        assert.equal(res.body.userId, 2);
+        accessToken = res.body.id;
+        json('get', `/api/users/me/projects/2?access_token=${accessToken}`)
+          .expect(200, function(err, res){
+            assert(typeof res.body === 'object');
+            assert.equal(res.body.ownerId, 2);
+            done();
+          });
+      });
+  });
+
+  it('should show user info using currentUserLiteral', function(done) {
+    json('post', '/api/users/login')
+      .send({
+        username: 'Bob',
+        password: 'opensesame'
+      })
+      .expect(200, function(err, res) {
+        accessToken = res.body.id;
+        json('get', `/api/users/me?access_token=${accessToken}`)
+          .expect(200, function(err, res){
+            assert(typeof res.body === 'object');
+            assert.equal(res.body.id, 3);
+            assert.equal(res.body.username, 'Bob');
+            done();
+          });
+      });
   });
 });
 

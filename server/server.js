@@ -18,6 +18,7 @@ boot(app, __dirname);
 
 app.set('view engine', 'ejs'); // LoopBack comes with EJS out-of-box
 app.set('json spaces', 2); // format json responses for easier viewing
+app.use(loopback.token({ model: app.models.accessToken, currentUserLiteral: 'me' }));
 
 // must be set to serve views properly when starting the app via `slc run` from
 // the project root

@@ -7,6 +7,7 @@
   <body>
   <h1>Startkicker<% if (typeof username !== 'undefined') { %> - Welcome <%=
       username %><% } %></h1>
+      accessToken <%= accessToken %>
     <table border=1 cellpadding=5>
       <tr>
         <th>Function</th>
@@ -89,6 +90,9 @@
           the balance instead of adding to it. Only the project owner is allowed
           to withdraw. We enforce this using `slc loopback:acl` to generate an
           ACL restricting access to $owner.</td>
+      </tr>
+      <tr>
+        <td><a href="/api/projects/list-projects">List projects</a></td>
       </tr>
       <tr>
         <td colspan=6><a href="/logout<% if (typeof accessToken !==

@@ -48,10 +48,30 @@ module.exports = function(app) {
       console.log('Created project:', project);
 
       //add team members
-      Team.create({
-        ownerId: project.ownerId,
-        memberId: users[1].id
-      }, function(err, team) {
+      Team.create([
+					{ownerId: project.ownerId, memberId: users[0].id},
+					{ownerId: project.ownerId, memberId: users[1].id}
+			], function(err, team) {
+        if (err) throw err;
+
+        console.log('Created team:', team);
+      });
+    });
+
+    //create project 3 and make jane the owner
+    users[1].projects.create({
+      name: 'project3',
+      balance: 10
+    }, function(err, project) {
+      if (err) throw err;
+
+      console.log('Created project:', project);
+
+      //add team members
+      Team.create([
+					{ownerId: project.ownerId, memberId: users[0].id},
+					{ownerId: project.ownerId, memberId: users[1].id}
+			], function(err, team) {
         if (err) throw err;
 
         console.log('Created team:', team);
@@ -73,7 +93,7 @@ module.exports = function(app) {
       }, function(err, principal) {
         if (err) throw err;
 
-        console.log('Created principal:', principal);
+        console.log('Created principal:', principal, 'for user', users[2].username);
       });
     });
   });
