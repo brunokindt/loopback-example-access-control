@@ -8,37 +8,7 @@
     }
   },
   "validations": [],
-  "relations": {
-    "projects": {
-      "type": "hasMany",
-      "model": "project",
-      "foreignKey": "ownerId"
-    },
-    "teams": {
-      "type": "hasMany",
-      "model": "team",
-      "foreignKey": "ownerId"
-    }
-  },
-  "acls": [
-		{
-		 "principalType": "ROLE",
-		 "principalId": "$owner",
-		 "permission": "ALLOW",
-		 "property": "__get__teams"
-		},
-		{
-		 "principalType": "ROLE",
-		 "principalId": "$owner",
-		 "permission": "ALLOW",
-		 "property": "__get__projects"
-		},
-		{
-		 "principalType": "ROLE",
-		 "principalId": "$owner",
-		 "permission": "ALLOW",
-		 "property": "__findById__projects"
-		}
-  ],
+  "relations": {},
+  "acls": [],
   "methods": []
 }

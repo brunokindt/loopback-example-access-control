@@ -3,23 +3,12 @@
   "base": "PersistedModel",
   "idInjection": true,
   "properties": {
-    "ownerId": {
-      "type": "string",
-      "required": true
-    },
-    "memberId": {
-      "type": "string",
-      "required": true
+    "name": {
+      "type": "string"
     }
   },
   "validations": [],
-  "relations": {
-    "members": {
-      "type": "hasMany",
-      "model": "user",
-      "foreignKey": "memberId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": []
 }
