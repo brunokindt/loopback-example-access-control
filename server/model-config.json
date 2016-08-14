@@ -38,5 +38,9 @@
   "project": {
     "dataSource": "db",
     "public": true
+  },
+  "shop": {
+    "dataSource": "db",
+    "public": true
   }
 }

@@ -1,100 +1,90 @@
-// Copyright IBM Corp. 2015,2016. All Rights Reserved.
-// Node module: loopback-example-access-control
-// This file is licensed under the Artistic License 2.0.
-// License text available at https://opensource.org/licenses/Artistic-2.0
+const chalk = require('chalk');
 
 module.exports = function(app) {
-  var User = app.models.user;
+  var User = app.models.User;
   var Role = app.models.Role;
-  var RoleMapping = app.models.RoleMapping;
+  var Shop = app.models.Shop;
   var Team = app.models.Team;
 
-  User.create([
-    {username: 'John', email: 'john@doe.com', password: 'opensesame'},
-    {username: 'Jane', email: 'jane@doe.com', password: 'opensesame'},
-    {username: 'Bob', email: 'bob@projects.com', password: 'opensesame'}
-  ], function(err, users) {
-    if (err) throw err;
+  var RoleMapping = app.models.RoleMapping;
 
-    console.log('Created users:', users);
 
-    // create project 1 and make john the owner
-    users[0].projects.create({
-      name: 'project1',
-      balance: 100
-    }, function(err, project) {
-      if (err) throw err;
+  function logSample(modelName, sample) {
+    sample = typeof sample.push === 'function' ? sample : [sample];
+    console.log(chalk.magenta(`Created ${modelName}:`));
+    sample.forEach( s => {
+      console.log('\t', chalk.blue(JSON.stringify(s)));
+    });
+  }
 
-      console.log('Created project:', project);
-
-      // add team members
-      Team.create([
-        {ownerId: project.ownerId, memberId: users[0].id},
-        {ownerId: project.ownerId, memberId: users[1].id}
-      ], function(err, team) {
-        if (err) throw err;
-
-        console.log('Created team:', team);
+  function createShops() {
+    var shops = Array.from(new Array(5), (x,i) => ({ name: `shop ${i}` }) );
+    return new Promise((resolve,  reject) => {
+      Shop.create(shops, (err, shops) => {
+        if (err) { reject(err); }
+        logSample('shops', shops);
+        resolve({shops: shops});
       });
     });
+  }
 
-    //create project 2 and make jane the owner
-    users[1].projects.create({
-      name: 'project2',
-      balance: 100
-    }, function(err, project) {
-      if (err) throw err;
-
-      console.log('Created project:', project);
-
-      //add team members
-      Team.create([
-					{ownerId: project.ownerId, memberId: users[0].id},
-					{ownerId: project.ownerId, memberId: users[1].id}
-			], function(err, team) {
-        if (err) throw err;
-
-        console.log('Created team:', team);
+  function createUsers(data) {
+    var users = Array.from(new Array(8), (x,i) => ({
+      username: i === 0 ? 'admin' : `user ${i}`,
+      email: i === 0 ? 'admin@example.com' : `user${i}@example.com`,
+      password: 'password'
+    }));
+    return new Promise((resolve, reject) => {
+      User.create(users, function(err, users) {
+        if (err) { reject(err); }
+        logSample('users', users);
+        data.users = users;
+        resolve(data);
       });
     });
+  }
 
-    //create project 3 and make jane the owner
-    users[1].projects.create({
-      name: 'project3',
-      balance: 10
-    }, function(err, project) {
-      if (err) throw err;
-
-      console.log('Created project:', project);
-
-      //add team members
-      Team.create([
-					{ownerId: project.ownerId, memberId: users[0].id},
-					{ownerId: project.ownerId, memberId: users[1].id}
-			], function(err, team) {
-        if (err) throw err;
-
-        console.log('Created team:', team);
+  function createTeams(data) {
+    var teams = Array.from(new Array(6), (x,i) => ({
+      shopId: data.shops[Math.floor(i/4)].id,
+      userId: data.users[i].id
+    }));
+    return new Promise((resolve, reject) => {
+      Team.create(teams, function(err, teams) {
+        if (err) { reject(err); }
+        logSample('teams', teams);
+        data.teams = teams;
+        resolve(data);
       });
     });
+  }
 
-    //create the admin role
-    Role.create({
-      name: 'admin'
-    }, function(err, role) {
-      if (err) throw err;
-
-      console.log('Created role:', role);
-
-      //make bob an admin
-      role.principals.create({
-        principalType: RoleMapping.USER,
-        principalId: users[2].id
-      }, function(err, principal) {
-        if (err) throw err;
-
-        console.log('Created principal:', principal, 'for user', users[2].username);
+  function createRole(roleName, user) {
+    return new Promise((resolve, reject) => {
+      Role.create({
+        name: roleName
+      }, (err, role) => {
+        if (err) { reject(err); }
+        logSample('role', role);
+        //make bob an admin
+        role.principals.create({
+          principalType: RoleMapping.USER,
+          principalId: user.id
+        }, function(err, principal) {
+          if (err) { reject(err); }
+          logSample('principal', principal);
+          resolve(principal);
+        });
       });
     });
+  }
+
+  createShops()
+  .then( data => createUsers(data) )
+  .then( data => createTeams(data) )
+  .then( data => createRole('admin', data.users[0]) )
+  .catch(err => {
+    console.log(err);
   });
+
 };
