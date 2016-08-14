@@ -47,7 +47,8 @@ module.exports = function(app) {
   function createTeams(data) {
     var teams = Array.from(new Array(6), (x,i) => ({
       shopId: data.shops[Math.floor(i/4)].id,
-      userId: data.users[i].id
+      userId: data.users[i].id,
+      job: i % 4 < 2 ? 'vet' : ''
     }));
     return new Promise((resolve, reject) => {
       Team.create(teams, function(err, teams) {

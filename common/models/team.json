@@ -5,6 +5,10 @@
   "properties": {
     "name": {
       "type": "string"
+    },
+    "job": {
+      "type": "string",
+      "default": ""
     }
   },
   "validations": [],
@@ -20,6 +24,19 @@
       "foreignKey": "userId"
     }
   },
-  "acls": [],
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    }
+  ],
   "methods": {}
 }
