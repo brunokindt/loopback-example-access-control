@@ -33,7 +33,7 @@
   },
   "team": {
     "dataSource": "db",
-    "public": true
+    "public": false
   },
   "project": {
     "dataSource": "db",

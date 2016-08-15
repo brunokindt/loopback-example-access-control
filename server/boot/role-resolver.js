@@ -1,3 +1,6 @@
+const chalk = require('chalk');
+const assert = require('assert');
+
 module.exports = function(app) {
   var Role = app.models.Role;
 
@@ -8,8 +11,10 @@ module.exports = function(app) {
       });
     }
 
-    // if the target model is not project
-    if (context.modelName !== 'project') {
+    console.log(chalk.yellow('teamMember resolver, context:'), context.modelName, context.property);
+
+    // if the target model is not shop
+    if (context.modelName !== 'shop') {
       return reject();
     }
 
@@ -19,22 +24,25 @@ module.exports = function(app) {
       return reject();
     }
 
-    // check if userId is in team table for the given project id
-    context.model.findById(context.modelId, function(err, project) {
-      if (err || !project)
+    // check if userId is in team table for the given shop id
+    context.model.findById(context.modelId, function(err, shop) {
+
+      if (err || !shop)
         return reject();
 
       var Team = app.models.Team;
       Team.count({
-        ownerId: project.ownerId,
-        memberId: userId
+        shopId: shop.id,
+        userId: userId
       }, function(err, count) {
-        if (err) {
+        console.log('Has team member', count);
+        if (err || typeof count !== 'number') {
           console.log(err);
           return cb(null, false);
         }
 
         cb(null, count > 0); // true = is a team member
+        //cb(null, typeof teamMember !== 'undefined'); // true = is a team member
       });
     });
   });

@@ -30,6 +30,7 @@ module.exports = function(app) {
 
   function createUsers(data) {
     var users = Array.from(new Array(8), (x,i) => ({
+      name: i === 0 ? 'admin' : `user ${i}`,
       username: i === 0 ? 'admin' : `user ${i}`,
       email: i === 0 ? 'admin@example.com' : `user${i}@example.com`,
       password: 'password'
